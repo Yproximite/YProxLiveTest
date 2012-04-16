@@ -39,7 +39,7 @@ class ScreenshotCommand extends Command
         $this->outputPath = $input->getArgument('outputPath');
 
         if (substr($this->outputPath, 0, 1) != '/') {
-            $this->outputPath = __DIR__.'/../../../../'.$this->outputPath;
+            $this->outputPath = __DIR__.'/../../../../../'.$this->outputPath;
         }
 
         $output->writeln('<info>Writing files to '.$this->outputPath.'</info>');
