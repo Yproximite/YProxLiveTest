@@ -135,7 +135,7 @@ class ResponseTimeCommand extends Command
                 continue; // we have already checked
             }
 
-            if ($href == '#') {
+            if (trim($href) == '#') {
                 continue;
             }
 
@@ -185,7 +185,7 @@ class ResponseTimeCommand extends Command
                 $this->fail($url, $stats['status'], 'Fail');
             }
         } else {
-            $this->output->writeln('<info>'.$stats['status'].'</info>');
+//            $this->output->writeln('<info>'.$stats['status'].'</info>');
         }
 
         // write stats
