@@ -178,13 +178,14 @@ class ResponseTimeCommand extends Command
             if (preg_match('&500&', $stats['status'])) {
                 if (preg_match('&<h1>(.*)</h1>&', $stats['content'], $matches)) {
                     $error = strip_tags($matches[1]);
+                    $this->fail($url, $stats['status'], $error);
                 }
                 
             } else {
                 $this->fail($url, $stats['status'], 'Fail');
             }
         } else {
-        //    $this->output->writeln('<info>'.$stats['status'].'</info>');
+            $this->output->writeln('<info>'.$stats['status'].'</info>');
         }
 
         // write stats
