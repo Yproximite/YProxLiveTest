@@ -15,6 +15,9 @@ class ResponseTimeCommand extends Command
     protected $checkedUrls = array();
     protected $fails = array();
 
+    // hack!!
+    protected $currentSiteId;
+
     protected $writeResponseHandle;
     protected $writeErrorsHandle;
 
@@ -34,6 +37,7 @@ class ResponseTimeCommand extends Command
         $this->addOption('write-errors', null, InputOption::VALUE_REQUIRED, 'Write errors to specified file');
         $this->addOption('write-response-times', null, InputOption::VALUE_REQUIRED, 'Write errors to specified file');
         $this->addOption('use-base-url', false, InputOption::VALUE_REQUIRED, 'Use base URL and Site IDs rather than hosts');
+        $this->addOption('host-filter', null, InputOption::VALUE_REQUIRED, 'Reg ex filter for hostname');
         $this->setName('test:response-time');
         $this->setDescription('Loads each page of a platform and checks for errors');
 //        $this->setDescription('Given a URL to a platformmap.xml document, for each site this script will find the navigation and click each link - checking for errors.');
@@ -58,14 +62,22 @@ class ResponseTimeCommand extends Command
             $this->writeErrorsHandle = fopen($writeErrorsFname, 'w');
         }
 
+        $hostFilter = $input->getOption('host-filter');
+
         $this->useBaseUrl = $input->getOption('use-base-url');
 
         $this->verbose = $input->getOption('verbose');
 
         foreach ($domSites as $i => $domSite) {
 
+            if ($hostFilter) {
+                if (!preg_match($hostFilter, $domSite->getAttribute('host'))) {
+                    continue;
+                }
+            }
+
             if ($baseUrl = $this->useBaseUrl) {
-                $baseUrl = $baseUrl.'/?site_id='.$domSite->getAttribute('id');
+                $this->currentSiteId = $domSite->getAttribute('id');
             } else {
                 $baseUrl = $domSite->getAttribute('host');
             }
@@ -82,7 +94,7 @@ class ResponseTimeCommand extends Command
 
         if ($this->fails) {
             foreach ($this->fails as $fail) {
-                $this->output->writeln('FAIL: '.$fail['url'].' - '.$fail['message']);
+                $this->output->writeln('FAIL: '.$fail['url'].' - ['.$fail['status'].'] '.$fail['message']);
             }
         } else {
             $this->output->writeln('All OK');
@@ -123,6 +135,10 @@ class ResponseTimeCommand extends Command
                 continue; // we have already checked
             }
 
+            if ($href == '#') {
+                continue;
+            }
+
             // check only pages in this domain (assuming no absolute links)
             if (!preg_match('&^https?&', $href)) {
                 $url = $stats['url'].$href;
@@ -146,21 +162,29 @@ class ResponseTimeCommand extends Command
         $displayStats = $stats;
         unset($displayStats['content']);
         if ($this->verbose) {
-            $this->output->writeln('<comment>'.print_r($displayStats, true).'</comment>');
         }
         $htmlSource = $stats['content'];
 
         // ########### checks
 
         // check for closing html tag
-        if (preg_match('&.*<html>.*&', $htmlSource)) {
-            if (!preg_match('&.*</html>.*&', $htmlSource)) {
-                $this->fail($url, 'No closing HTML tag');
-            }
-        }
+        # if (preg_match('&.*<html>.*&', $htmlSource)) {
+        #     if (!preg_match('&.*</html>.*&', $htmlSource)) {
+        #         $this->fail($url, 'No closing HTML tag');
+        #     }
+        # }
 
         if (!in_array($stats['status'], array('HTTP/1.0 200 OK', 'HTTP/1.0 302 Found'))) {
-            $this->fail($url, 'Returned status "'.$stats['status'].'"');
+            if (preg_match('&500&', $stats['status'])) {
+                if (preg_match('&<h1>(.*)</h1>&', $stats['content'], $matches)) {
+                    $error = strip_tags($matches[1]);
+                }
+                
+            } else {
+                $this->fail($url, $stats['status'], 'Fail');
+            }
+        } else {
+        //    $this->output->writeln('<info>'.$stats['status'].'</info>');
         }
 
         // write stats
@@ -173,10 +197,10 @@ class ResponseTimeCommand extends Command
         return $stats;
     }
 
-    protected function fail($url, $message)
+    protected function fail($url, $status, $message)
     {
-        $this->fails[] = array('url' => $url, 'message' => $message);
-        $this->output->writeln('<error>'.$url.': '.$message.'</error>');
+        $this->fails[] = array('url' => $url, 'status' => $status, 'message' => $message);
+        $this->output->writeln('<error>'.$url.': ['.$status.'] '.$message.'</error>');
 
         if ($this->writeErrorsHandle) {
             fwrite($this->writeErrorsHandle, sprintf(sprintf("%s : %s\n", $url, $message)));
@@ -192,8 +216,19 @@ class ResponseTimeCommand extends Command
     {
         $startTime = microtime(true);
         $ch = curl_init();
+
+        if ($this->currentSiteId) {
+            $requestUrl = $url.'?site_id='.$this->currentSiteId.'&icare';
+        } else {
+            $requestUrl = $url.'?icare';
+        }
+
+        if ($this->verbose) {
+            $this->output->writeln($requestUrl);
+        }
+
         curl_setopt ($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt ($ch, CURLOPT_URL, $url);
+        curl_setopt ($ch, CURLOPT_URL, $requestUrl);
         curl_setopt ($ch, CURLOPT_CONNECTTIMEOUT, 10);
         curl_setopt ($ch, CURLOPT_TIMEOUT, 10);
         curl_setopt ($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.11) Gecko/20071127 Firefox/2.0.0.11');
