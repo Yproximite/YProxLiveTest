@@ -27,6 +27,7 @@ class ScreenshotCommand extends Command
         $this->addArgument('outputPath', InputArgument::REQUIRED);
 
         $this->addOption('use-base-url', false, InputOption::VALUE_REQUIRED, 'Use base URL and Site IDs rather than hosts');
+        $this->addOption('limit', null, null, 'Set screenshot limit (for testing)');
         $this->setName('test:screenshots');
         $this->setDescription('Loads first page of each site in map and take a screenshot');
     }
@@ -35,6 +36,11 @@ class ScreenshotCommand extends Command
     {
         $start = microtime(true);
         $this->output = $output;
+        $domOut = new \DOMDocument("1.0");
+        $outEl = $domOut->createElement('screenshots');
+        $outEl->setAttribute('date', date('c'));
+        $domOut->appendChild($outEl);
+        $limit = $input->getOption('limit');
 
         $this->outputPath = $input->getArgument('outputPath');
 
@@ -52,7 +58,7 @@ class ScreenshotCommand extends Command
         $dom = new \DOMDocument(1.0);
         $dom->load($url);
         $xpath = new \DOMXPath($dom);
-        $domSites = $xpath->query('//site[@isBaseSite="false" and @billingStatus!="test"]');
+        $domSites = $xpath->query('//site[@billingStatus!="test"]');
 
         $this->useBaseUrl = $input->getOption('use-base-url');
         $this->verbose = $input->getOption('verbose');
@@ -65,8 +71,12 @@ class ScreenshotCommand extends Command
         $this->sessionId = $parts[1];
 
         foreach ($domSites as $i => $domSite) {
+            if ($limit && $i > $limit) {
+                break;
+            }
+            $uniqid = uniqid(); // uniqid for this screenshot
             if ($baseUrl = $this->useBaseUrl) {
-                $baseUrl = $baseUrl.'/?site_id='.$domSite->getAttribute('id').'&icare';
+                $baseUrl = $baseUrl.'/?site_id='.$domSite->getAttribute('id').'&icare&_allow_base_site=1';
             } else {
                 $baseUrl = 'http://'.$domSite->getAttribute('host');
             }
@@ -74,10 +84,18 @@ class ScreenshotCommand extends Command
             $this->output->writeln('Checking site '.($i + 1).'/'.$domSites->length.' : '.$domSite->getAttribute('host').' ('.$baseUrl.')');
             $this->doCommand('open', array($baseUrl));
             $this->doCommand('waitForPageToLoad');
-            $this->doCommand('captureEntirePageScreenshot', array($this->outputPath.'/'.$domSite->getAttribute('host').'.png'));
+            $this->doCommand('captureEntirePageScreenshot', array($this->outputPath.'/'.$uniqid.'.png'));
             $body = $this->doCommand('getHtmlSource');
             $html = substr($body, 3);
             $html = '<html>'.$html.'</html>';
+
+            $screenEl = $domOut->createElement('screenshot');
+            $screenEl->setAttribute('createdAt', date('c'));
+            $screenEl->setAttribute('index', $i + 1);
+            $screenEl->setAttribute('id', $uniqid);
+            $screenEl->appendChild($domOut->importNode($domSite, true));
+            $outEl->appendChild($screenEl);
+            $domOut->save($this->outputPath.'/screenshots.xml');
         }
 
         $end = microtime(true) - $start;
