@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<screenshots date="2012-04-30T07:25:39+00:00"><screenshot createdAt="2012-04-30T07:25:49+00:00" index="1" id="4f9e3e782b639"><site id="1" title="Plomberie Site" dataParentId="" billingStatus="trial" isBaseSite="yes" host="testweb.fr" themeEngine="original">
+    <theme>
+      <originalTheme id="24" title="Vive3" dataParentId="" createdAt="2012-04-30T07:55:44+01:00" updateedAt="2012-04-30T07:55:50+01:00"/>
+    </theme>
+  </site></screenshot><screenshot createdAt="2012-04-30T07:25:52+00:00" index="2" id="4f9e3e7d1ed49"><site id="2" title="Old Major Tester" dataParentId="1" billingStatus="trial" isBaseSite="no" host="old-major.testweb.fr" themeEngine="original">
+    <theme>
+      <originalTheme id="18" title="Sobre" dataParentId="" createdAt="2012-04-30T07:55:44+01:00" updateedAt="2012-04-30T07:55:50+01:00"/>
+    </theme>
+  </site></screenshot><screenshot createdAt="2012-04-30T07:25:56+00:00" index="3" id="4f9e3e80d63c6"><site id="3" title="Napolean Tester" dataParentId="1" billingStatus="trial" isBaseSite="no" host="napolean.testweb.fr" themeEngine="original">
+    <theme>
+      <originalTheme id="18" title="Sobre" dataParentId="" createdAt="2012-04-30T07:55:44+01:00" updateedAt="2012-04-30T07:55:50+01:00"/>
+    </theme>
+  </site></screenshot><screenshot createdAt="2012-04-30T07:25:58+00:00" index="4" id="4f9e3e84632dc"><site id="4" title="Snowball Tester" dataParentId="1" billingStatus="trial" isBaseSite="no" host="snowball.testweb.fr" themeEngine="weymouth">
+    <theme>
+      <variation id="1" title="Variation 1" author="admin@ylly.fr" createdAt="2012-04-23T10:22:50+01:00" updatedAt="2012-04-30T07:56:00+01:00" type="variation" schemaVersion="5" themeOwnerId="1" context="site" stage="_not_set" uniqueKey="4f952d7a5d280" thumb150="/theme/files/site/4f952d7a5d280/_thumb/S150." thumb300="/theme/files/site/4f952d7a5d280/_thumb/S300." thumb600="/theme/files/site/4f952d7a5d280/_thumb/S600." thumbnail="" status="production" siteId="1"/>
+    </theme>
+  </site></screenshot><screenshot createdAt="2012-04-30T07:26:00+00:00" index="5" id="4f9e3e86a6cea"><site id="5" title="Squealer Tester" dataParentId="1" billingStatus="trial" isBaseSite="no" host="squealer.testweb.fr" themeEngine="weymouth">
+    <theme>
+      <variation id="1" title="Variation 1" author="admin@ylly.fr" createdAt="2012-04-23T10:22:50+01:00" updatedAt="2012-04-30T07:56:00+01:00" type="variation" schemaVersion="5" themeOwnerId="1" context="site" stage="_not_set" uniqueKey="4f952d7a5d280" thumb150="/theme/files/site/4f952d7a5d280/_thumb/S150." thumb300="/theme/files/site/4f952d7a5d280/_thumb/S300." thumb600="/theme/files/site/4f952d7a5d280/_thumb/S600." thumbnail="" status="production" siteId="1"/>
+    </theme>
+  </site></screenshot></screenshots>
