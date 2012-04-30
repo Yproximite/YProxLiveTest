@@ -2,14 +2,14 @@
 OUTPUT_DIR="`pwd`/output/screenshots"
 THUMB_SIZE="400x400"
 
-if [ ! -e $OUTPUT_DIR ]
+if [ ! -e "$OUTPUT_DIR" ]
 then
-    mkdir -p $OUTPUT_DIR
+    mkdir -p "$OUTPUT_DIR"
 fi
 
-if [ ! -e $OUTPUT_DIR/$THUMB_SIZE ]
+if [ ! -e "$OUTPUT_DIR"/$THUMB_SIZE ]
 then
-    mkdir -p $OUTPUT_DIR/$THUMB_SIZE
+    mkdir -p "$OUTPUT_DIR"/$THUMB_SIZE
 fi
 
 rm $OUTPUT_DIR/original/*
