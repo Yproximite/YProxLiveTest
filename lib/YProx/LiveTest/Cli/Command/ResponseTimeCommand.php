@@ -52,7 +52,7 @@ class ResponseTimeCommand extends Command
         $dom = new \DOMDocument(1.0);
         $dom->load($url);
         $xpath = new \DOMXPath($dom);
-        $domSites = $xpath->query('//site[@isBaseSite="false" and @billingStatus!="test"]');
+        $domSites = $xpath->query('//site[@isBaseSite="no" and @billingStatus!="test"]');
 
         if ($writeResponseTimesFname = $input->getOption('write-response-times')) {
             $this->writeResponseHandle = fopen($writeResponseTimesFname, 'w');
