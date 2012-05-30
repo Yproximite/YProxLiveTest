@@ -14,7 +14,7 @@ fi
 
 rm -f "$OUTPUT_DIR"/original/*
 
-php bin/test.php test:screenshots http://admin.plombierweb.fr/platformmap.xml "$OUTPUT_DIR/original"
+php bin/test.php test:screenshots --use-base-url=YPROX_BASE_URL http://admin.plombierweb.fr/platformmap.xml "$OUTPUT_DIR/original"
 #php bin/test.php test:screenshots --use-base-url=http://yprox.localhost http://yprox.localhost/platformmap.xml $OUTPUT_DIR/original
 mogrify -auto-orient  -thumbnail 400x400 -unsharp 0x.5 -path "$OUTPUT_DIR/$THUMB_SIZE" "$OUTPUT_DIR/original/*.png"
 xsltproc ci/screenshot.xsl output/screenshots/original/screenshots.xml > output/screenshots/index.html

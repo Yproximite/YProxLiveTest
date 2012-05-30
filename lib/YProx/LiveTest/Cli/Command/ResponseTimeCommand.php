@@ -12,11 +12,8 @@ class ResponseTimeCommand extends Command
 {
     protected $output;
     protected $verbose = false;
-    protected $checkedUrls = array();
+    protected $checkedHosts = array();
     protected $fails = array();
-
-    // hack!!
-    protected $currentSiteId;
 
     protected $writeResponseHandle;
     protected $writeErrorsHandle;
@@ -76,18 +73,12 @@ class ResponseTimeCommand extends Command
                 }
             }
 
-            if ($baseUrl = $this->useBaseUrl) {
-                $this->currentSiteId = $domSite->getAttribute('id');
-            } else {
-                $baseUrl = $domSite->getAttribute('host');
-            }
-
             $this->output->writeln('Checking site '.($i + 1).'/'.$domSites->length.' : '.$domSite->getAttribute('host').' ('.$this->useBaseUrl.')');
 
-            if ($stats = $this->checkUrl($baseUrl)) {
+            if ($stats = $this->checkSite($domSite)) {
                 // only crawl links if status is 200
                 if ($stats['status'] == 'HTTP/1.0 200 OK') {
-                    $this->crawl($stats);
+                    $this->crawl($domSite, $stats);
                 }
             }
         }
@@ -113,7 +104,7 @@ class ResponseTimeCommand extends Command
         $output->writeln('<info>Done ('.number_format($end, 2).' seconds)</info>');
     }
 
-    protected function crawl($stats)
+    protected function crawl($domSite, $stats)
     {
         libxml_use_internal_errors(true);
         $dom = new \DOMDocument(1.0);
@@ -139,24 +130,25 @@ class ResponseTimeCommand extends Command
                 continue;
             }
 
+            if (trim($href) == '') {
+                continue;
+            }
+
             // check only pages in this domain (assuming no absolute links)
             if (!preg_match('&^https?&', $href)) {
-                $url = $stats['url'].$href;
                 $this->output->writeln(' -- checking linked page '.$href);
-                $this->checkUrl($url);
+                $this->checkSite($domSite, $href);
             }
         }
     }
 
-    protected function checkUrl($url)
+    protected function checkSite($domSite, $link = '')
     {
-        if (in_array($url, $this->checkedUrls)) {
+        if (in_array($domSite->getAttribute('host').$link, $this->checkedHosts)) {
             return array();
         }
 
-        if (!preg_match('&^(http|https)://&', $url)) {
-            $url = 'http://'.$url;
-        }
+        $url = $this->getBaseUrl($domSite, $link);
 
         $stats = $this->fetchUrl($url);
         $displayStats = $stats;
@@ -193,7 +185,7 @@ class ResponseTimeCommand extends Command
             $this->writeResponseTime($url, $stats);
         }
 
-        $this->checkedUrls[] = $url;
+        $this->checkedHosts[] = $domSite->getAttribute('host').$link;
 
         return $stats;
     }
@@ -218,18 +210,12 @@ class ResponseTimeCommand extends Command
         $startTime = microtime(true);
         $ch = curl_init();
 
-        if ($this->currentSiteId) {
-            $requestUrl = $url.'?site_id='.$this->currentSiteId.'&icare';
-        } else {
-            $requestUrl = $url.'?icare';
-        }
-
         if ($this->verbose) {
-            $this->output->writeln($requestUrl);
+            $this->output->writeln($url);
         }
 
         curl_setopt ($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt ($ch, CURLOPT_URL, $requestUrl);
+        curl_setopt ($ch, CURLOPT_URL, $url);
         curl_setopt ($ch, CURLOPT_CONNECTTIMEOUT, 10);
         curl_setopt ($ch, CURLOPT_TIMEOUT, 10);
         curl_setopt ($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.8.1.11) Gecko/20071127 Firefox/2.0.0.11');
@@ -266,6 +252,24 @@ class ResponseTimeCommand extends Command
         $stats['content'] = implode("\n", $content);
 
         return $stats;
+    }
+
+    protected function getBaseUrl($domSite, $link = '')
+    {
+        $url = $this->useBaseUrl;
+        if (!$url) {
+            $url = $domSite->getAttribute('host');
+        }
+
+        if (!preg_match('&^(http|https)://&', $url)) {
+            $url = 'http://'.$url;
+        }
+
+        return sprintf('%s%s?site_id=%d&icare',
+            $url,
+            $link,
+            $domSite->getAttribute('id')
+        );
     }
 }
 
