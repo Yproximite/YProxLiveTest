@@ -38,9 +38,9 @@
             </h3>
 
             <a>
-                <xsl:attribute name="href">/original/<xsl:value-of select="../@id"/>.png</xsl:attribute>
+                <xsl:attribute name="href">/today/original/site-<xsl:value-of select="../@id"/>.png</xsl:attribute>
                 <img>
-                    <xsl:attribute name="src">/400x400/<xsl:value-of select="../@id"/>.png</xsl:attribute>
+                    <xsl:attribute name="src">/today/400x400/site-<xsl:value-of select="../@id"/>.png</xsl:attribute>
                 </img>
             </a>
             <table class="properties">

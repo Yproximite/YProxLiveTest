@@ -60,9 +60,17 @@ class ScreenshotCommand extends Command
         $xpath = new \DOMXPath($dom);
         $domSites = $xpath->query('//site[@billingStatus!="test"]');
 
+        if ($domSites->length == 0) {
+            $output->writeln('<error>No sites found in platform map</error>');
+            return;
+        }
+
         $this->useBaseUrl = $input->getOption('use-base-url');
         $this->verbose = $input->getOption('verbose');
+
         $session = $this->doCommand('getNewBrowserSession', array('firefox', 'http://127.0.0.1'));
+        $this->doCommand('setTimeout', array(30 * 1000));
+
         $parts = explode(',', $session);
         if ($parts[0] == 'OK') {
         } else {
@@ -74,7 +82,6 @@ class ScreenshotCommand extends Command
             if ($limit && $i > $limit) {
                 break;
             }
-            $uniqid = uniqid(); // uniqid for this screenshot
             if ($baseUrl = $this->useBaseUrl) {
                 $baseUrl = $baseUrl.'/?site_id='.$domSite->getAttribute('id').'&icare&_allow_base_site=1';
             } else {
@@ -84,7 +91,7 @@ class ScreenshotCommand extends Command
             $this->output->writeln('Checking site '.($i + 1).'/'.$domSites->length.' : '.$domSite->getAttribute('host').' ('.$baseUrl.')');
             $this->doCommand('open', array($baseUrl));
             $this->doCommand('waitForPageToLoad');
-            $this->doCommand('captureEntirePageScreenshot', array($this->outputPath.'/'.$uniqid.'.png'));
+            $this->doCommand('captureEntirePageScreenshot', array($this->outputPath.'/site-'.$domSite->getAttribute('id').'.png'));
             $body = $this->doCommand('getHtmlSource');
             $html = substr($body, 3);
             $html = '<html>'.$html.'</html>';
@@ -92,13 +99,18 @@ class ScreenshotCommand extends Command
             $screenEl = $domOut->createElement('screenshot');
             $screenEl->setAttribute('createdAt', date('c'));
             $screenEl->setAttribute('index', $i + 1);
-            $screenEl->setAttribute('id', $uniqid);
+            $screenEl->setAttribute('id', $domSite->getAttribute('id'));
             $screenEl->appendChild($domOut->importNode($domSite, true));
             $outEl->appendChild($screenEl);
             $domOut->save($this->outputPath.'/screenshots.xml');
+            $date = date('Y-m-d');
+            $domOut->save($fname = $this->outputPath.'/screenshots-'.$date.'.xml');
+            $output->writeln('<info>Written XML metadata to : </info>'.$fname);
         }
 
         $end = microtime(true) - $start;
+        $output->writeln('<info>Closing browser instance ..</info>');
+        $this->doCommand('testComplete');
         $output->writeln('');
         $output->writeln('<info>Done ('.number_format($end, 2).' seconds)</info>');
     }
