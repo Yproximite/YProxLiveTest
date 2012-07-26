@@ -1,7 +1,7 @@
 #!/usr/bin/sh
 OUTPUT_DIR="`pwd`/output/screenshots/daily/`date +%Y%m%d`"
 THUMB_SIZE_1="400x400"
-THUMB_SIZE_2="16x16"
+THUMB_SIZE_2="24x24"
 TODAY_DIR=`pwd`/output/screenshots/today
 
 if [ ! -e "$OUTPUT_DIR" ]
