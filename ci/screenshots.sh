@@ -27,10 +27,11 @@ php bin/test.php test:screenshots --use-base-url=$YPROX_BASE_URL http://admin.yp
 mogrify -auto-orient -thumbnail 400x400 -unsharp 0x.5 -path "$OUTPUT_DIR/$THUMB_SIZE_1" "$OUTPUT_DIR/original/*.png"
 mogrify -auto-orient -thumbnail $THUMB_SIZE_2 -unsharp 0x.5 -path "$OUTPUT_DIR/$THUMB_SIZE_2" "$OUTPUT_DIR/$THUMB_SIZE_1/*.png"
 
-if [ ! -e $TODAY_DIR ]
-then
-    ln -s $OUTPUT_DIR $TODAY_DIR
+if [ -e $TODAY_DIR ]
+    rm $TODAY_DIR
 fi
+
+ln -s $OUTPUT_DIR $TODAY_DIR
 
 xsltproc ci/screenshot.xsl "$OUTPUT_DIR/original/screenshots.xml > output/screenshots/index.html"
 
