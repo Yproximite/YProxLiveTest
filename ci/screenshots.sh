@@ -21,7 +21,8 @@ fi
 
 rm -f "$OUTPUT_DIR"/original/*
 
-php bin/test.php test:screenshots --use-base-url=$YPROX_BASE_URL http://fleurs-melun.com/platformmap.xml "$OUTPUT_DIR/original"
+
+php bin/test.php test:screenshots --use-base-url=$YPROX_BASE_URL http://admin.yproximite.fr/platformmap.xml "$OUTPUT_DIR/original"
 #php bin/test.php test:screenshots --use-base-url=http://yprox.localhost http://yprox.localhost/platformmap.xml $OUTPUT_DIR/original
 mogrify -auto-orient -thumbnail 400x400 -unsharp 0x.5 -path "$OUTPUT_DIR/$THUMB_SIZE_1" "$OUTPUT_DIR/original/*.png"
 mogrify -auto-orient -thumbnail $THUMB_SIZE_2 -unsharp 0x.5 -path "$OUTPUT_DIR/$THUMB_SIZE_2" "$OUTPUT_DIR/$THUMB_SIZE_1/*.png"
