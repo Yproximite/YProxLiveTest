@@ -28,6 +28,7 @@ mogrify -auto-orient -thumbnail 400x400 -unsharp 0x.5 -path "$OUTPUT_DIR/$THUMB_
 mogrify -auto-orient -thumbnail $THUMB_SIZE_2 -unsharp 0x.5 -path "$OUTPUT_DIR/$THUMB_SIZE_2" "$OUTPUT_DIR/$THUMB_SIZE_1/*.png"
 
 if [ -e $TODAY_DIR ]
+then
     rm $TODAY_DIR
 fi
 
