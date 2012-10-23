@@ -18,7 +18,7 @@ class SiteDiffCommand extends Command
         $this->addArgument('outdir', InputArgument::REQUIRED);
         $this->addArgument('baseUrl1', InputArgument::REQUIRED);
         $this->addArgument('baseUrl2', InputArgument::REQUIRED);
-        $this->setName('test:site-diff');
+        $this->setName('test:regression:html-diff');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -47,14 +47,18 @@ class SiteDiffCommand extends Command
         $fh = fopen($linkFile, 'r');
 
         while ($line = fgets($fh)) {
+            $line = str_replace("\n", "", $line);
             $version1 = $this->renderUrl($baseUrl1, $line);
             $version2 = $this->renderUrl($baseUrl2, $line);
             $diff = $this->getDiff($version1, $version2);
             if ($diff) {
                 $linefname = preg_replace('&[^A-Za-z0-9]&', '_', $line);
-                $fname = $dirname.'/'.urlencode($linefname);
+                $fname = $dirname.'/'.urlencode($linefname).'.diff';
                 $this->output->writeln('<comment>Diff found</comment>:'. $fname);
                 $h =fopen($fname, 'w');
+                fwrite($h, '< '.$baseUrl1."\n");
+                fwrite($h, '> '.$baseUrl2."\n");
+                fwrite($h, "\n");
                 fwrite($h, $diff);
                 fclose($h);
             } else {
@@ -64,8 +68,8 @@ class SiteDiffCommand extends Command
 
     protected function renderUrl($baseUrl, $url)
     {
-        $command = 'lynx -dump '.$baseUrl.'/'.$url;
-        $this->output->write('<info>Rendering page:</info> '.$command);
+        $command = 'lynx -dump "'.$baseUrl.'/'.$url.'"';
+        $this->output->writeln('<info>Rendering page:</info> '.$command);
         exec($command, $outlines);
         $res = implode("\n", $outlines);
 
