@@ -45,21 +45,25 @@ class SiteDiffCommand extends Command
             mkdir($dirname);
         }
         $fh = fopen($linkFile, 'r');
+        $i = -1;
 
         while ($line = fgets($fh)) {
+            $i++;
             $line = str_replace("\n", "", $line);
             $version1 = $this->renderUrl($baseUrl1, $line);
             $version2 = $this->renderUrl($baseUrl2, $line);
             $diff = $this->getDiff($version1, $version2);
             if ($diff) {
                 $linefname = preg_replace('&[^A-Za-z0-9]&', '_', $line);
-                $fname = $dirname.'/'.urlencode($linefname).'.diff';
+                $fname = $dirname.'/'.sprintf('%05s_', $i).$linefname.'.diff';
                 $this->output->writeln('<comment>Diff found</comment>:'. $fname);
                 $h =fopen($fname, 'w');
-                fwrite($h, '< '.$baseUrl1."\n");
-                fwrite($h, '> '.$baseUrl2."\n");
-                fwrite($h, "\n");
-                fwrite($h, $diff);
+                $out = array();
+                $out[] = '< '.$baseUrl1.'/'.$line;
+                $out[] = '> '.$baseUrl2.'/'.$line;
+                $out[] = "";
+                $out[] = $diff;
+                fwrite($h, implode("\n", $out));
                 fclose($h);
             } else {
             }
