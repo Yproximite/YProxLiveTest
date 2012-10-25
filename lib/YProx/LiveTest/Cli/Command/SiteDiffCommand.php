@@ -78,6 +78,11 @@ class SiteDiffCommand extends Command
         $res = implode("\n", $outlines);
 
         $res = str_replace($baseUrl, '', $res);
+        // ignore the error reporting by line (different for each environemnt)
+        preg_match('&/home/(.*?)/web/site.php&s', $res, $matches);
+        if ($matches) {
+            $res = preg_replace('&'.$matches[1].'&s', '', $res);
+        }
 
         return $res;
     }
