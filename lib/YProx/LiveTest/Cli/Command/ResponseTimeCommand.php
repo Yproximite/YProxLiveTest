@@ -77,7 +77,8 @@ class ResponseTimeCommand extends Command
 
             if ($stats = $this->checkSite($domSite)) {
                 // only crawl links if status is 200
-                if ($stats['status'] == 'HTTP/1.0 200 OK') {
+                if ($stats['status'] == 'HTTP/1.0 200 OK' ||
+                $stats['status'] == 'HTTP/1.1 200 OK') {
                     $this->crawl($domSite, $stats);
                 }
             }
@@ -166,7 +167,7 @@ class ResponseTimeCommand extends Command
         #     }
         # }
 
-        if (!in_array($stats['status'], array('HTTP/1.0 200 OK', 'HTTP/1.0 302 Found'))) {
+        if (!in_array($stats['status'], array('HTTP/1.0 200 OK', 'HTTP/1.0 302 Found','HTTP/1.1 200 OK', 'HTTP/1.1 302 Found'))) {
             if (preg_match('&500&', $stats['status'])) {
                 if (preg_match('&<h1>(.*)</h1>&', $stats['content'], $matches)) {
                     $error = strip_tags($matches[1]);
