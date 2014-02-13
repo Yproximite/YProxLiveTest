@@ -46,7 +46,7 @@ class ResponseTimeCommand extends Command
 
         $this->output = $output;
         $url = $input->getArgument('platformMapURL');
-        $dom = new \DOMDocument(1.0);
+        $dom = new \DOMDocument(1.1);
         $dom->load($url);
         $xpath = new \DOMXPath($dom);
         $domSites = $xpath->query('//site[@isBaseSite="no" and @billingStatus!="test"]');
@@ -77,7 +77,7 @@ class ResponseTimeCommand extends Command
 
             if ($stats = $this->checkSite($domSite)) {
                 // only crawl links if status is 200
-                if ($stats['status'] == 'HTTP/1.0 200 OK') {
+                if ($stats['status'] == 'HTTP/1.1 200 OK') {
                     $this->crawl($domSite, $stats);
                 }
             }
@@ -107,7 +107,7 @@ class ResponseTimeCommand extends Command
     protected function crawl($domSite, $stats)
     {
         libxml_use_internal_errors(true);
-        $dom = new \DOMDocument(1.0);
+        $dom = new \DOMDocument(1.1);
         $dom->loadHtml($stats['content']);
         $xpath = new \DOMXPath($dom);
         $navLinks = $xpath->query('//a');
@@ -166,7 +166,7 @@ class ResponseTimeCommand extends Command
         #     }
         # }
 
-        if (!in_array($stats['status'], array('HTTP/1.0 200 OK', 'HTTP/1.0 302 Found'))) {
+        if (!in_array($stats['status'], array('HTTP/1.1 200 OK', 'HTTP/1.1 302 Found'))) {
             if (preg_match('&500&', $stats['status'])) {
                 if (preg_match('&<h1>(.*)</h1>&', $stats['content'], $matches)) {
                     $error = strip_tags($matches[1]);
